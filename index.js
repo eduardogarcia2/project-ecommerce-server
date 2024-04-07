@@ -29,9 +29,9 @@ app.post("/create_preference", async (req, res) => {
                     currency_id: "MXN"
                 })),
                 back_urls: {
-                    success: "http://localhost:5173/success",
-                    failure: "http://localhost:5173/failure",
-                    pending: "http://localhost:5173/pending",
+                    success: "https://project-ecommerce-wowm.onrender.com/success",
+                    failure: "https://project-ecommerce-wowm.onrender.com/failure",
+                    pending: "https://project-ecommerce-wowm.onrender.com/pending",
                 },
                 auto_return: "approved",
             }
