@@ -26,7 +26,7 @@ app.post("/create_preference", async (req, res) => {
                     title: item.title,
                     quantity: item.quantity,
                     unit_price: item.unit_price,
-                    currency_id: "MXN"
+                    currency_id: "USD"
                 })),
                 back_urls: {
                     success: "https://project-ecommerce-wowm.onrender.com/success",
