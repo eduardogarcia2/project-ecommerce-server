@@ -1,10 +1,11 @@
 import express from "express"
 import cors from "cors";
 
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+// import { MercadoPagoConfig, Preference, Payment, MercadoPago } from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 const client = new MercadoPagoConfig({
-    accessToken: "TEST-7228085904947829-040602-ffad206dcc4ed387ce5f3f6531d4a39a-277588512",
+    accessToken: "TEST-7228085904947829-040602-ffad206dcc4ed387ce5f3f6531d4a39a-277588512", options: { timeout: 5000 }
 });
 
 const app = express();
@@ -26,17 +27,19 @@ app.post("/create_preference", async (req, res) => {
                     title: item.title,
                     quantity: item.quantity,
                     unit_price: item.unit_price,
-                    currency_id: "USD"
+                    currency_id: "USD",
                 })),
                 back_urls: {
-                    success: "https://project-ecommerce-wowm.onrender.com/success",
-                    failure: "https://project-ecommerce-wowm.onrender.com/failure",
-                    pending: "https://project-ecommerce-wowm.onrender.com/pending",
+                    back_urls: {
+                        success: "https://project-ecommerce-wowm.onrender.com//success",
+                        failure: "https://project-ecommerce-wowm.onrender.com//failure",
+                        pending: "https://project-ecommerce-wowm.onrender.com//pending",
+                    },
                 },
-                auto_return: "approved",
             }
         });
 
+        // const response = await Preference.create(preference);
         res.json({
             id: result.id,
         });
@@ -47,6 +50,54 @@ app.post("/create_preference", async (req, res) => {
         });
     }
 });
+
+app.post("/process_payment", async (req, res) => {
+    try {
+        const { formData } = req.body;
+
+        const payment = new Payment(client);
+        const paymentResponse = await payment.create({
+            body: {
+                token: formData.token,
+                installments: formData.installments,
+                // transaction_amount: formData.transaction_amount,
+                transaction_amount: formData.transaction_amount,
+                // payment_method_id: formData.payment_method_id,
+                payment_method_id: formData.payment_method_id,
+                payer: {
+                    // email: formData.email,
+                    email: "traxer3122@gmail.com",
+                }
+            }
+        });
+
+        if (paymentResponse.status === "approved") {
+            res.json({
+                status: "success",
+                message: "Pago procesado con exito",
+                paymentId: paymentResponse,
+            });
+        } else if (paymentResponse.status === "pending") {
+            res.json({
+                status: "pending",
+                message: "Pago pendiente",
+                paymentId: paymentResponse,
+            });
+        }
+         else {
+            res.status(400).json({
+                status: "error",
+                message: "Error al procesar el pago",
+            })
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Error interno del servidor',
+        });
+    }
+})
 
 app.listen(port, () => {
     console.log(`El servidor esta corriendo en el puerto ${port}`)
